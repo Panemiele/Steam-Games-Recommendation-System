@@ -146,3 +146,15 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+# Data files
+kaggle/
+*.csv
+
+# NN pointers
+*.joblib
+
+# Api key
+api_key.txt
+
+# Tests script
+test*
