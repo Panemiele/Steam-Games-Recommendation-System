@@ -157,4 +157,5 @@ kaggle/
 api_key.txt
 
 # Tests script
-test*
+test*!
+*.7z
