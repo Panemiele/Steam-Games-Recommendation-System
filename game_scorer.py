@@ -59,7 +59,7 @@ def execute_sentiment_analysis_text_transformed(transformed_text, tfidf, sa_algo
 
 def process_row(args, tf_idf, sa_algorithm):
     idx, review_row = args
-    # Weight formula: (valoreSentiment x 1,5)(se review_text non null) + 1,3 x review_score + 1,15 x (review_votes)
+    # Weight formula: review_value + (1 + 0,1 x (review_votes)) x (probability)
     game_id = review_row['app_id']
     review_value = review_row['review_score']
     review_votes = review_value * (review_row['review_votes'])
