@@ -87,13 +87,13 @@ def transform_data(sample, voc_index, s_a_algorithm):
 
 if __name__ == '__main__':
     print("start")
-    if os.path.exists("kaggle/dataset_text_converted.csv"):
+    if os.path.exists("dataset/dataset_text_converted.csv"):
 
-        new_df = pd.read_csv('kaggle/dataset_text_converted.csv')
+        new_df = pd.read_csv('dataset/dataset_text_converted.csv')
         print("Dataset imported")
 
     else:
-        revs_og = pd.read_csv('kaggle/dataset_text.csv')
+        revs_og = pd.read_csv('dataset/dataset_text.csv')
         revs_og.dropna(inplace=True)
         new_df = revs_og
         new_df.drop_duplicates(inplace=True)
