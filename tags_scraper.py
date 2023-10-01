@@ -1,19 +1,20 @@
-import numpy as np
-import pandas as pd
-from matplotlib import pyplot as plt
-import nltk
-from joblib import load
-import requests
-import re
-import urllib.parse
-import time
-from tqdm import tqdm
-import multiprocessing
+# This script reads the user-given tags for a specific game directly from steam's store webpage. To do so,
+# the page of the game is requested in GET from the store, and filtered manually via a regex, to find every category
+# the game has.
+# This operation is made asynchronously to make it faster, with some delays in-between
+#
+# This procedure is done since Steam api's do not offer any way to get game's user-given tags, which are more
+# accurate than the ones that the store gives
 
-from sklearn.naive_bayes import GaussianNB, MultinomialNB, BernoulliNB
-from sklearn import tree
-from sklearn.linear_model import SGDClassifier
-from sklearn.metrics import accuracy_score, precision_score, confusion_matrix, f1_score, recall_score
+import multiprocessing
+import re
+import time
+import urllib.parse
+import os.path
+
+import pandas as pd
+import requests
+from tqdm import tqdm
 
 game_info_url = "https://store.steampowered.com/app/"
 
@@ -92,12 +93,16 @@ def start():
     games_tag_df.to_csv('games_tags.csv', index=False)
 
 
-
-# Guard to make the call asyncronous
+# Guard to make the call asynchronous
 if __name__ == "__main__":
-    res = input("Analysis already done. Are you sure you'd like to restart? (Y)es/(N)o")
-    if res.lower() == 'n' or res.lower() == 'no':
-        exit(0)
-    print("Starting the analysis for the tags. Putting a 10 seconds delay just to make sure you know what you're doing.")
-    time.sleep(10)
+    if os.path.exists('games_tags.csv'):
+        res = input("Analysis already done. Are you sure you'd like to restart? (Y)es/(N)o")
+        if res.lower() == 'n' or res.lower() == 'no':
+            exit(0)
+        print(
+            "Putting a 10 seconds delay just to make sure you know what you're doing "
+            "and not overwriting the result by error.")
+        time.sleep(10)
+
+    print("Starting the tags scraping")
     start()
