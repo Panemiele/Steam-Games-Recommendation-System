@@ -159,3 +159,4 @@ api_key.txt
 # Tests script
 test*!
 *.7z
+sentiment-analysis_BCK*

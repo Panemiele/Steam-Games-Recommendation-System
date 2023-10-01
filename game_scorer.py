@@ -1,16 +1,26 @@
+# This code is needed to automatize the process of doing sentiment analysis on the review text. It starts by stemming
+# the review text and saving the file with the converted text. Then it creates an index by using the tf-idf
+# algorithm, which is needed to train a NN that uses the Stochastic Gradient Descent algorithm to be trained on.
+#
+# After that is done, a score to the review is given based on the sentiment analysis, its review vote, and if the
+# review is voted. Those are then summed to the previous score given to the game itself, which at the end of such
+# process, gets saved inside a file, to make it easier to work on the processed data.
+
 import math
 import multiprocessing
+import os.path
 import time
 from functools import partial
-import numpy as np
+
 import nltk
+import numpy as np
 import pandas as pd
 import tqdm
-from pandarallel import pandarallel
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import SGDClassifier
 from sklearn.metrics import f1_score, precision_score, recall_score, accuracy_score, confusion_matrix
 from sklearn.model_selection import train_test_split
+from pandarallel import pandarallel
 
 nltk.download('stopwords', quiet=True)
 
@@ -72,40 +82,35 @@ def process_row(args, tf_idf, sa_algorithm):
 def transform_data(sample, voc_index, s_a_algorithm):
     res = process_row(sample, voc_index, s_a_algorithm)
     thread_score = pd.DataFrame([res])
-    # if res['game_id'] in thread_score['game_id'].values:
-    #     Update the 'score' value for the existing 'game_id'
-    # thread_score.loc[thread_score['game_id'] == res['game_id'], 'score'] += res['score']
-    # else:
-    #     Create a new DataFrame for the row to append
-    #     Concatenate the new DataFrame with the existing 'score' DataFrame
-    # thread_score = thread_score.append({'game_id': [res['game_id']], 'score': [res['score']]})
     return thread_score
 
 
 if __name__ == '__main__':
     print("start")
-    revs_og = pd.read_csv('kaggle/dataset_text_converted.csv')
-    print("Dataset imported")
+    if os.path.exists("kaggle/dataset_text_converted.csv"):
 
-    revs_og.dropna(inplace=True)
-    # revs = revs_og[['app_id', 'app_name', 'review_score', 'review_text']]
-    revs = revs_og
-    # revs.dropna(inplace=True)
-    new_df = revs
+        new_df = pd.read_csv('kaggle/dataset_text_converted.csv')
+        print("Dataset imported")
+
+    else:
+        revs_og = pd.read_csv('kaggle/dataset_text.csv')
+        revs_og.dropna(inplace=True)
+        new_df = revs_og
+        new_df.drop_duplicates(inplace=True)
+        new_df.rename(columns={'review_score': 'target', 'review_text': 'text'}, inplace=True)
+        new_df['char_num'] = new_df['text'].apply(len)
+        new_df['word_num'] = new_df['text'].apply(lambda x: len(nltk.word_tokenize(x)))
+        new_df['sent_num'] = new_df['text'].apply(lambda x: len(nltk.sent_tokenize(x)))
+
+        print("beginning text convertion")
+        pandarallel.initialize(nb_workers=12)
+        new_df['converted_text'] = new_df['review_text'].parallel_apply(convert_text)
+        print("text convertion done")
+        print("Saving the converted text")
+        new_df.to_csv('dataset_converted.csv', index=False)
+        print("Done saving")
+
     new_df.reset_index(drop=True, inplace=True)
-    # new_df.drop_duplicates(inplace=True)
-    # new_df.rename(columns={'review_score': 'target', 'review_text': 'text'}, inplace=True)
-    # new_df['char_num'] = new_df['text'].apply(len)
-    # new_df['word_num'] = new_df['text'].apply(lambda x: len(nltk.word_tokenize(x)))
-    # new_df['sent_num'] = new_df['text'].apply(lambda x: len(nltk.sent_tokenize(x)))
-
-    # print("beginning text convertion")
-    # pandarallel.initialize(nb_workers=12)
-    # new_df['converted_text'] = new_df['review_text'].parallel_apply(convert_text)
-    # print("text convertion done")
-    # print("Saving the converted text")
-    # new_df.to_csv('dataset_converted.csv', index=False)
-    # print("Done saving")
     print("Starting tfidf")
     tfidf = TfidfVectorizer(max_features=400)
     X_tfid = tfidf.fit_transform(new_df['converted_text']).toarray()
@@ -116,7 +121,6 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=34)
 
     sgd = SGDClassifier(loss="modified_huber")
-    # sgd.fit(X_train, y_train)
 
     print("Start Stochastic Gradient Descent training.")
     # Wrap the SGDClassifier training loop with tqdm to create a progress bar
@@ -152,7 +156,6 @@ if __name__ == '__main__':
     # Use partial to create a function with fixed arguments (voc_index and s_a_algorithm)
     transform_data_partial = partial(transform_data, voc_index=tfidf, s_a_algorithm=sgd)
 
-
     # Define a function to track the progress
     def track_progress(iterator, total, desc="Processing"):
         with tqdm.tqdm(total=total, desc=desc) as pbar:
@@ -164,7 +167,6 @@ if __name__ == '__main__':
                 if counter == 2000:
                     pbar.update(2000)
                     counter = 0
-
 
     start_time = time.time()
     try:
@@ -180,7 +182,6 @@ if __name__ == '__main__':
         print("Interrupted code execution by the user")
     finally:
         print("Beginning file save")
-        # print(res_list)
 
         end_time = time.time()
         # Calculate the elapsed time
@@ -199,6 +200,5 @@ if __name__ == '__main__':
 
         # Save the combined_thread_score DataFrame to CSV
         print("Saving")
-        # scores.to_csv('games_score.csv', index=False)
+        scores.to_csv('games_score.csv', index=False)
         print("Saved", len(scores), "elements")
-        # print(scores)
