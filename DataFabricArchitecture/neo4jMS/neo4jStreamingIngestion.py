@@ -112,7 +112,7 @@ def writeStreamingGameUsersRelationshipsInNeo4j(data_frame):
 # VARIABLES SECTION #
 #####################
 # --------------------------------------------------------------------------------------------------#
-application_name = "ingestion-util"
+application_name = "neo4j-ingestion-util"
 kafka_host_port = "localhost:9092"
 reviews_topic_name = "reviews-ingestion-topic"
 users_topic_name = "users-ingestion-topic"
