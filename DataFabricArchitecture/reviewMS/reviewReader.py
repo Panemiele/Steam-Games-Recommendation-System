@@ -51,8 +51,8 @@ def process_csv(path_to_file):
     new_df.rename(columns={'review_score': 'sentiment_target', 'review_text': 'text'}, inplace=True)
     new_df.reset_index(drop=True, inplace=True)
     new_df["id"] = new_df.index
-    pandarallel.initialize()
-    new_df['converted_text'] = new_df['text'].apply(convert_text)
+    pandarallel.initialize(nb_workers=4)
+    new_df['converted_text'] = new_df['text'].parallel_apply(convert_text)
     return new_df
 
 
