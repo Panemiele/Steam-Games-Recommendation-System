@@ -51,7 +51,7 @@ def start():
         print(f"Api file '{file_path}' not found.")
 
     # Get the list of games found in the data, and generate a list of categories
-    revs = pd.read_csv('kaggle/dataset.csv')
+    revs = pd.read_csv('dataset/reviews.csv')
     game_ids = revs['app_id'].unique()
     print(game_ids.size)
 
