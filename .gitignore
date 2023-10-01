@@ -147,6 +147,7 @@ dmypy.json
 cython_debug/
 
 # Data files
+dataset/
 kaggle/
 *.csv
 
