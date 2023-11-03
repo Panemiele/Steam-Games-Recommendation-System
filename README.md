@@ -4,7 +4,7 @@
 
 This repository stores a Machine Learning and Intelligent Internet Systems project made by Romeo Reiner and Romualdi Gabriele for the test.
 
-The purpose of the project was the creation of a Steam game Recommender system through standard Machine Learning approaches and classifiers, such as Naive Bayes, Decision Trees and Stochastic Gradient Descent for the sentiment analysis part, while the recommender part is being done with an item-approach recommender system.
+The purpose of the project was the creation of a Steam game Recommender system through standard Machine Learning approaches and classifiers, such as Naive Bayes, Decision Trees and Stochastic Gradient Descent for the sentiment analysis part, while the recommender part is being done with an hybrid-approach recommender system.
 
 The process is implemented in Python and its libraries.
 
